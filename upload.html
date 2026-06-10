@@ -328,6 +328,8 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
         const SUPABASE_URL = 'https://buqhkvqtsnlnlwheotra.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ1cWhrdnF0c25sbmx3aGVvdHJhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwODcwMTMsImV4cCI6MjA5NjY2MzAxM30.8jHH3O3vmmRFaV0BHBvjwmscDa9vvjzxcZvJrKerY3w';
         const BUCKET_NAME = 'galerie';
@@ -471,6 +473,7 @@
                 submitBtn.textContent = 'Foto hochladen';
             }
         });
+     });        
     </script>
 </body>
 </html>

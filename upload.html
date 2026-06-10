@@ -1,50 +1,329 @@
 <!DOCTYPE html>
-<html>
+<html lang="de">
 <head>
-  <title>Photo Upload</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Foto Upload</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+        }
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .form-container {
+            background: white;
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            max-width: 500px;
+            width: 100%;
+        }
+        h1 {
+            margin: 0 0 8px 0;
+            font-size: 28px;
+            color: #333;
+        }
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+        }
+        input[type="text"],
+        textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.2s;
+        }
+        input[type="text"]:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+        .file-upload {
+            position: relative;
+            width: 100%;
+            padding: 40px 20px;
+            border: 2px dashed #ccc;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            background: #fafafa;
+            transition: all 0.2s;
+        }
+        .file-upload:hover {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+        .file-upload.dragover {
+            border-color: #667eea;
+            background: #e8edff;
+        }
+        .file-upload input {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+        .file-upload-icon {
+            font-size: 40px;
+            margin-bottom: 10px;
+        }
+        .file-upload-text {
+            color: #666;
+            font-size: 14px;
+        }
+        .file-name {
+            margin-top: 10px;
+            font-size: 13px;
+            color: #667eea;
+            font-weight: 500;
+        }
+        .preview-container {
+            margin-top: 15px;
+            display: none;
+        }
+        .preview-container img {
+            max-width: 100%;
+            max-height: 200px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        button {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        .message {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .gallery-link {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .gallery-link a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .gallery-link a:hover {
+            text-decoration: underline;
+        }
+    </style>
 </head>
 <body>
+    <div class="form-container">
+        <h1> Foto hochladen</h1>
+        <p class="subtitle">Teile dein Foto mit uns für die Galerie</p>
+        
+        <div class="message success" id="successMsg">
+            Vielen Dank! Dein Foto wurde erfolgreich hochgeladen.
+        </div>
+        <div class="message error" id="errorMsg">
+            ❌ Es gab einen Fehler. Bitte versuche es erneut.
+        </div>
+        
+        <form id="uploadForm">
+            <div class="form-group">
+                <label for="name">Dein Name</label>
+                <input type="text" id="name" name="name" placeholder="Max Mustermann">
+            </div>
+            
+            <div class="form-group">
+                <label for="description">Beschreibung des Fotos</label>
+                <textarea id="description" name="description" placeholder="Erzähle uns etwas über dein Foto..."></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label>Foto auswählen *</label>
+                <div class="file-upload" id="fileUpload">
+                    <input type="file" id="photo" name="photo" accept="image/*" required>
+                    <div class="file-upload-icon">🖼️</div>
+                    <div class="file-upload-text">Klicke hier oder ziehe ein Bild hinein</div>
+                    <div class="file-name" id="fileName"></div>
+                </div>
+                <div class="preview-container" id="previewContainer">
+                    <img id="previewImage" src="" alt="Vorschau">
+                </div>
+            </div>
+            
+            <button type="submit" id="submitBtn">Foto hochladen</button>
+        </form>
+        
+        <div class="gallery-link">
+            <a href="gallery.html">📷 Zur Galerie</a>
+        </div>
+    </div>
 
-<input type="file" id="fileInput" />
-<button onclick="uploadImage()">Upload</button>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        // ⚠️ WICHTIG: Ersetze diese Werte mit deinen Supabase-Daten
+        const SUPABASE_URL = 'https://buqhkvqtsnlnlwheotra.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ1cWhrdnF0c25sbmx3aGVvdHJhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwODcwMTMsImV4cCI6MjA5NjY2MzAxM30.8jHH3O3vmmRFaV0BHBvjwmscDa9vvjzxcZvJrKerY3w';
+        const BUCKET_NAME = 'photos'; // Dein Storage Bucket Name
+        const TABLE_NAME = 'photos';  // Deine Tabelle für Metadaten (optional)
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-<script>
-const supabaseUrl = "https://buqhkvqtsnlnlwheotra.supabase.co";
-const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ1cWhrdnF0c25sbmx3aGVvdHJhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwODcwMTMsImV4cCI6MjA5NjY2MzAxM30.8jHH3O3vmmRFaV0BHBvjwmscDa9vvjzxcZvJrKerY3w";
-const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+        const form = document.getElementById('uploadForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const successMsg = document.getElementById('successMsg');
+        const errorMsg = document.getElementById('errorMsg');
+        const fileInput = document.getElementById('photo');
+        const fileName = document.getElementById('fileName');
+        const previewContainer = document.getElementById('previewContainer');
+        const previewImage = document.getElementById('previewImage');
+        const fileUpload = document.getElementById('fileUpload');
 
-async function uploadImage() {
-  const file = document.getElementById("fileInput").files[0];
+        // Dateivorschau
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                fileName.textContent = file.name;
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    previewImage.src = e.target.result;
+                    previewContainer.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+        });
 
-  const fileName = Date.now() + "_" + file.name;
+        // Drag & Drop
+        fileUpload.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            fileUpload.classList.add('dragover');
+        });
+        fileUpload.addEventListener('dragleave', () => {
+            fileUpload.classList.remove('dragover');
+        });
+        fileUpload.addEventListener('drop', (e) => {
+            e.preventDefault();
+            fileUpload.classList.remove('dragover');
+            if (e.dataTransfer.files.length) {
+                fileInput.files = e.dataTransfer.files;
+                fileInput.dispatchEvent(new Event('change'));
+            }
+        });
 
-  // 1. Upload in Storage
-  const { data, error } = await supabase
-    .storage
-    .from("photos")
-    .upload(fileName, file);
+        // Formular absenden
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Wird hochgeladen...';
+            successMsg.style.display = 'none';
+            errorMsg.style.display = 'none';
 
-  if (error) {
-    alert("Upload error");
-    return;
-  }
+            const name = document.getElementById('name').value;
+            const description = document.getElementById('description').value;
+            const photoFile = fileInput.files[0];
 
-  // 2. Public URL holen
-  const { data: publicUrl } = supabase
-    .storage
-    .from("photos")
-    .getPublicUrl(fileName);
+            try {
+                // Eindeutigen Dateinamen erstellen
+                const fileExt = photoFile.name.split('.').pop();
+                const uniqueName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
 
-  // 3. In Tabelle speichern (optional)
-  await supabase
-    .from("photos")
-    .insert([{ image_url: publicUrl.publicUrl, filename: fileName }]);
+                // Schritt 1: Bild zu Supabase Storage hochladen
+                const { data: uploadData, error: uploadError } = await supabase.storage
+                    .from(BUCKET_NAME)
+                    .upload(uniqueName, photoFile, {
+                        cacheControl: '3600',
+                        upsert: false
+                    });
 
-  alert("Upload erfolgreich!");
-}
-</script>
+                if (uploadError) throw uploadError;
 
+                // Schritt 2: Öffentliche URL abrufen
+                const { data: urlData } = supabase.storage
+                    .from(BUCKET_NAME)
+                    .getPublicUrl(uniqueName);
+
+                // Schritt 3: Metadaten in Tabelle speichern (optional)
+                const { error: insertError } = await supabase
+                    .from(TABLE_NAME)
+                    .insert([{
+                        submitter_name: name,
+                        photo_description: description,
+                        photo_url: urlData.publicUrl,
+                        file_name: uniqueName,
+                        upload_date: new Date().toISOString(),
+                        moderation_status: 'new'
+                    }]);
+
+                if (insertError) throw insertError;
+
+                successMsg.style.display = 'block';
+                form.reset();
+                previewContainer.style.display = 'none';
+                fileName.textContent = '';
+
+            } catch (error) {
+                console.error('Fehler:', error);
+                errorMsg.textContent = `❌ Fehler: ${error.message}`;
+                errorMsg.style.display = 'block';
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Foto hochladen';
+            }
+        });
+    </script>
 </body>
 </html>

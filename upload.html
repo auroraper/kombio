@@ -440,12 +440,6 @@
                     .from(BUCKET_NAME)
                     .getPublicUrl(uniqueName);
 
-                const dataToUpload = {
-                // If the value is an empty string, send null; otherwise send the value
-                event_date: dateInput.value === "" ? null : dateInput.value,
-                title: titleInput.value
-                };
-
                 const { error: insertError } = await supabase
                     .from(TABLE_NAME)
                     .insert([{

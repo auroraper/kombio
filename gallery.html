@@ -230,7 +230,6 @@
         .lightbox-close:hover {
             transform: scale(1.2);
         }
-
         @media (max-width: 768px) {
             .gallery-grid {
                 grid-template-columns: repeat(2, 1fr);
@@ -336,7 +335,7 @@
 
                     galleryGrid.appendChild(item);
 
-                    // Bild laden abwarten, dann Grid-Höhe berechnen (Masonry-Effekt)
+                    // Bild laden abwarten, dann Grid-Höhe berechnen
                     const img = item.querySelector('img');
                     const resizeItem = () => {
                         const rowHeight = 10;
@@ -381,20 +380,6 @@
 
         lightbox.addEventListener('click', (e) => {
             if (e.target === lightbox) closeLightbox();
-        });
-
-        // Beim Drehen/Resizen des Fensters die Kartenhöhen neu berechnen
-        let resizeTimeout;
-        window.addEventListener('resize', () => {
-            clearTimeout(resizeTimeout);
-            resizeTimeout = setTimeout(() => {
-                document.querySelectorAll('.gallery-item').forEach(item => {
-                    const rowHeight = 10;
-                    const rowGap = 20;
-                    const rowSpan = Math.ceil((item.getBoundingClientRect().height + rowGap) / (rowHeight + rowGap));
-                    item.style.gridRowEnd = `span ${rowSpan}`;
-                });
-            }, 200);
         });
 
         loadPhotos();

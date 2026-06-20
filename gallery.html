@@ -67,24 +67,27 @@
         }
 
         .gallery-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            grid-auto-rows: 10px;
-            gap: 20px;
+            columns: 4 200px;
+            column-gap: 20px;
         }
 
         .gallery-item {
             background: #2F2725;
             border-radius: 16px;
             overflow: hidden;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-            transition: transform 0.3s, box-shadow 0.3s;
+            box-shadow: 0 0 0 1px rgba(255,255,255,0.06);
+            transition: transform 0.3s;
             cursor: pointer;
+            break-inside: avoid;
+            -webkit-column-break-inside: avoid;
+            display: inline-block;
+            width: 100%;
+            margin-bottom: 20px;
+            vertical-align: top;
         }
 
         .gallery-item:hover {
             transform: translateY(-5px);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
         }
 
         .gallery-item img {
@@ -230,10 +233,11 @@
         .lightbox-close:hover {
             transform: scale(1.2);
         }
+
         @media (max-width: 768px) {
             .gallery-grid {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 12px;
+                columns: 2 150px;
+                column-gap: 12px;
             }
         }
     </style>
@@ -334,21 +338,6 @@
                     `;
 
                     galleryGrid.appendChild(item);
-
-                    // Bild laden abwarten, dann Grid-Höhe berechnen
-                    const img = item.querySelector('img');
-                    const resizeItem = () => {
-                        const rowHeight = 10;
-                        const rowGap = 20;
-                        const rowSpan = Math.ceil((item.getBoundingClientRect().height + rowGap) / (rowHeight + rowGap));
-                        item.style.gridRowEnd = `span ${rowSpan}`;
-                    };
-
-                    if (img.complete) {
-                        resizeItem();
-                    } else {
-                        img.addEventListener('load', resizeItem);
-                    }
                 });
 
             } catch (error) {

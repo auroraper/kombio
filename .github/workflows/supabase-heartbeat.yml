@@ -1,0 +1,22 @@
+name: Supabase Heartbeat
+
+# Hält das Supabase-Projekt aktiv, indem alle 3 Tage
+# eine echte Datenbank-Anfrage gesendet wird.
+# Damit Supabase nicht nach 7 Tagen Inaktivität pausiert wird.
+
+on:
+  schedule:
+    # Läuft alle 3 Tage um 06:00 UTC
+    - cron: '0 6 */3 * *'
+  workflow_dispatch: # erlaubt manuelles Auslösen über den "Run workflow" Button auf GitHub
+
+jobs:
+  ping-supabase:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Supabase photos table
+        run: |
+          curl -s -o /dev/null -w "HTTP Status: %{http_code}\n" \
+            "https://buqhkvqtsnlnlwheotra.supabase.co/rest/v1/photos?select=id&limit=1" \
+            -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}"

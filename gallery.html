@@ -66,9 +66,18 @@
             font-size: 14px;
         }
 
+        /* Masonry per Flexbox-Spalten: jede Spalte ist ein eigener vertikaler Container */
         .gallery-grid {
-            columns: 4 200px;
-            column-gap: 20px;
+            display: flex;
+            gap: 20px;
+        }
+
+        .gallery-column {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            flex: 1;
+            min-width: 0;
         }
 
         .gallery-item {
@@ -78,9 +87,6 @@
             border: 1px solid rgba(255,255,255,0.08);
             transition: transform 0.3s;
             cursor: pointer;
-            break-inside: avoid;
-            -webkit-column-break-inside: avoid;
-            margin: 0 0 20px 0;
         }
 
         .gallery-item:hover {
@@ -231,10 +237,14 @@
             transform: scale(1.2);
         }
 
+        /* Desktop: 4 Spalten (Standard oben definiert via flex: 1 auf 4 Elementen) */
+        /* Handy: 2 Spalten */
         @media (max-width: 768px) {
             .gallery-grid {
-                columns: 2 150px;
-                column-gap: 12px;
+                gap: 12px;
+            }
+            .gallery-column {
+                gap: 12px;
             }
         }
     </style>
@@ -265,6 +275,7 @@
 
         <div class="error-msg" id="errorMsg"></div>
 
+        <!-- Die Spalten werden per JavaScript erzeugt -->
         <div class="gallery-grid" id="galleryGrid"></div>
     </div>
 
@@ -296,6 +307,57 @@
         const stats = document.getElementById('stats');
         const lightbox = document.getElementById('lightbox');
 
+        // Anzahl Spalten: 4 auf Desktop, 2 auf Handy
+        function getColumnCount() {
+            return window.innerWidth <= 768 ? 2 : 4;
+        }
+
+        function createGalleryItem(photo) {
+            const item = document.createElement('div');
+            item.className = 'gallery-item';
+            item.onclick = () => openLightbox(photo);
+
+            const date = new Date(photo.upload_date).toLocaleDateString('de-DE', {
+                day: '2-digit',
+                month: 'long',
+                year: 'numeric'
+            });
+
+            item.innerHTML = `
+                <img src="${photo.photo_url}" alt="${photo.photo_description || 'Foto'}" loading="lazy">
+                <div class="gallery-item-info">
+                    <h3 class="gallery-item-name">${photo.submitter_name || 'Anonym'}</h3>
+                    ${photo.photo_description ? `<p class="gallery-item-description">${photo.photo_description}</p>` : ''}
+                    <span class="gallery-item-date"> ${date}</span>
+                </div>
+            `;
+
+            return item;
+        }
+
+        function renderGallery(photos) {
+            galleryGrid.innerHTML = '';
+
+            const columnCount = getColumnCount();
+            const columns = [];
+
+            for (let i = 0; i < columnCount; i++) {
+                const col = document.createElement('div');
+                col.className = 'gallery-column';
+                columns.push(col);
+                galleryGrid.appendChild(col);
+            }
+
+            // Fotos im Zickzack auf die Spalten verteilen:
+            // Foto 0 -> Spalte 0, Foto 1 -> Spalte 1, Foto 2 -> Spalte 0 (bei 2 Spalten), usw.
+            photos.forEach((photo, index) => {
+                const targetColumn = columns[index % columnCount];
+                targetColumn.appendChild(createGalleryItem(photo));
+            });
+        }
+
+        let currentPhotos = [];
+
         async function loadPhotos() {
             try {
                 const { data: photos, error } = await supabase
@@ -312,36 +374,15 @@
                     return;
                 }
 
+                currentPhotos = photos;
                 stats.textContent = `${photos.length} Foto${photos.length !== 1 ? 's' : ''} in der Galerie`;
-
-                photos.forEach(photo => {
-                    const item = document.createElement('div');
-                    item.className = 'gallery-item';
-                    item.onclick = () => openLightbox(photo);
-
-                    const date = new Date(photo.upload_date).toLocaleDateString('de-DE', {
-                        day: '2-digit',
-                        month: 'long',
-                        year: 'numeric'
-                    });
-
-                    item.innerHTML = `
-                        <img src="${photo.photo_url}" alt="${photo.photo_description || 'Foto'}" loading="lazy">
-                        <div class="gallery-item-info">
-                            <h3 class="gallery-item-name">${photo.submitter_name || 'Anonym'}</h3>
-                            ${photo.photo_description ? `<p class="gallery-item-description">${photo.photo_description}</p>` : ''}
-                            <span class="gallery-item-date"> ${date}</span>
-                        </div>
-                    `;
-
-                    galleryGrid.appendChild(item);
-                });
+                renderGallery(currentPhotos);
 
             } catch (error) {
                 console.error('Fehler beim Laden:', error);
                 loading.style.display = 'none';
                 errorMsg.style.display = 'block';
-                errorMsg.textContent = `Fehler beim Laden der Fotos: ${error.message}`;
+                errorMsg.textContent = `❌ Fehler beim Laden der Fotos: ${error.message}`;
             }
         }
 
@@ -366,6 +407,20 @@
 
         lightbox.addEventListener('click', (e) => {
             if (e.target === lightbox) closeLightbox();
+        });
+
+        // Beim Drehen des Handys / Resizen des Fensters Spaltenzahl neu prüfen
+        let lastColumnCount = getColumnCount();
+        let resizeTimeout;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(() => {
+                const newColumnCount = getColumnCount();
+                if (newColumnCount !== lastColumnCount && currentPhotos.length > 0) {
+                    lastColumnCount = newColumnCount;
+                    renderGallery(currentPhotos);
+                }
+            }, 200);
         });
 
         loadPhotos();

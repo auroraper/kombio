@@ -1,22 +1,41 @@
 name: Supabase Heartbeat
 
-# Hält das Supabase-Projekt aktiv, indem alle 3 Tage
-# eine echte Datenbank-Anfrage gesendet wird.
-# Damit Supabase nicht nach 7 Tagen Inaktivität pausiert wird.
+# Verhindert zwei Probleme:
+# 1. Supabase pausiert das Projekt nach 7 Tagen Inaktivität
+# 2. GitHub deaktiviert diesen Workflow nach 60 Tagen ohne Repo-Aktivität
 
 on:
   schedule:
-    # Läuft alle 3 Tage um 06:00 UTC
-    - cron: '0 6 */3 * *'
-  workflow_dispatch: # erlaubt manuelles Auslösen über den "Run workflow" Button auf GitHub
+    # Läuft täglich um 06:00 UTC
+    - cron: '0 6 * * *'
+  workflow_dispatch: # Manuelles Auslösen über den "Run workflow" Button auf GitHub
+
+permissions:
+  actions: write
+  contents: write
 
 jobs:
   ping-supabase:
     runs-on: ubuntu-latest
     steps:
+
+      # Schritt 1: Supabase anpingen (echte Datenbank-Anfrage)
       - name: Ping Supabase photos table
         run: |
-          curl -s -o /dev/null -w "HTTP Status: %{http_code}\n" \
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
             "https://buqhkvqtsnlnlwheotra.supabase.co/rest/v1/photos?select=id&limit=1" \
             -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
-            -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}"
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}")
+          echo "Supabase HTTP Status: $STATUS"
+          if [ "$STATUS" != "200" ]; then
+            echo "⚠️ Warnung: Supabase antwortete mit Status $STATUS"
+          else
+            echo "✅ Supabase ist aktiv und erreichbar"
+          fi
+
+      # Schritt 2: GitHub-Repo aktiv halten damit dieser Workflow nicht deaktiviert wird
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Keep GitHub workflow active (verhindert 60-Tage-Deaktivierung)
+        uses: gautamkrishnar/keepalive-workflow@v2

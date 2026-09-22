@@ -375,14 +375,14 @@
                 }
 
                 currentPhotos = photos;
-                stats.textContent = `${photos.length} Foto${photos.length !== 1 ? 's' : ''} in der Galerie`;
+                stats.textContent = `${photos.length} photo${photos.length !== 1 ? 's' : ''} in the gallery`;
                 renderGallery(currentPhotos);
 
             } catch (error) {
                 console.error('Fehler beim Laden:', error);
                 loading.style.display = 'none';
                 errorMsg.style.display = 'block';
-                errorMsg.textContent = `❌ Fehler beim Laden der Fotos: ${error.message}`;
+                errorMsg.textContent = `❌ Error loading photos: ${error.message}`;
             }
         }
 

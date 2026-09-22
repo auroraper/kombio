@@ -264,33 +264,33 @@
             <img src="KOMBIO.png" alt="Kombio Logo" style="max-width: 150px; height: auto;">
         </div>
 
-        <h1>Teile deinen Kombio Moment</h1>
+        <h1>Share your Kombio moment</h1>
 
         <div class="message success" id="successMsg">
-            Vielen Dank! Dein Foto wurde erfolgreich hochgeladen.
+            Thanks! Photo succesfully uploaded.
         </div>
         <div class="message error" id="errorMsg">
-            ❌ Es gab einen Fehler. Bitte versuche es erneut.
+            ❌ There has been an issue. Please retry.
         </div>
 
         <form id="uploadForm">
             <div class="form-group">
-                <label for="name">Dein Name</label>
+                <label for="name">Your name</label>
                 <input type="text" id="name" name="name" placeholder="Max Mustermann">
             </div>
 
             <div class="form-group">
-                <label for="description">Beschreibung</label>
+                <label for="description">Description</label>
                 <textarea id="description" name="description" placeholder="Erzähle von deinem Kombio Moment..."></textarea>
             </div>
 
             <div class="form-group">
-                <label>Foto aufnehmen oder auswählen</label>
+                <label>Take or select a photo</label>
 
                 <div class="camera-buttons">
                     <label class="camera-btn">
                         <div class="icon">📷</div>
-                        <div class="text">Kamera</div>
+                        <div class="text">Camera</div>
                         <input type="file" id="cameraInput" accept="image/*" capture="environment">
                     </label>
                     <label class="camera-btn">
@@ -300,29 +300,29 @@
                     </label>
                 </div>
 
-                <div class="or-divider">— oder —</div>
+                <div class="or-divider">— or —</div>
 
                 <div class="file-upload" id="fileUpload">
                     <input type="file" id="photo" name="photo" accept="image/*">
                     <div class="file-upload-icon">🖼️</div>
-                    <div class="file-upload-text">Aus Galerie wählen oder Bild hineinziehen</div>
+                    <div class="file-upload-text">Select from gallery or drag in an image</div>
                     <div class="file-name" id="fileName"></div>
                 </div>
 
                 <div class="preview-container" id="previewContainer">
                     <img id="previewImage" src="" alt="Vorschau">
                     <div class="confirm-buttons" id="confirmButtons">
-                        <button type="button" class="confirm-btn accept" id="confirmPhoto">✓ Foto verwenden</button>
-                        <button type="button" class="confirm-btn reject" id="retakePhoto">✗ Neues Foto</button>
+                        <button type="button" class="confirm-btn accept" id="confirmPhoto">✓ use photo</button>
+                        <button type="button" class="confirm-btn reject" id="retakePhoto">✗ new photo</button>
                     </div>
                 </div>
             </div>
 
-            <button type="submit" id="submitBtn" class="submit-btn hidden">Foto hochladen</button>
+            <button type="submit" id="submitBtn" class="submit-btn hidden">upload photo</button>
         </form>
 
         <div class="gallery-link">
-            <a href="gallery.html">Zur Kombio Galerie</a>
+            <a href="gallery.html">To the Kombio Gallery</a>
         </div>
     </div>
 
@@ -419,7 +419,7 @@
             }
 
             submitBtn.disabled = true;
-            submitBtn.textContent = 'Wird hochgeladen...';
+            submitBtn.textContent = 'Uploading...';
             successMsg.style.display = 'none';
             errorMsg.style.display = 'none';
 

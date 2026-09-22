@@ -255,6 +255,25 @@
         .gallery-link a:hover {
             text-decoration: underline;
         }
+        .gallery-link a {
+            display: inline-block;
+            padding: 12px 30px;
+            border-radius: 10px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        @keyframes pulse {
+            0%   { transform: scale(1);    box-shadow: 0 0 0 0 rgba(255, 0, 99, 0.7); }
+            50%  { transform: scale(1.05); box-shadow: 0 0 0 12px rgba(255, 0, 99, 0); }
+            100% { transform: scale(1);    box-shadow: 0 0 0 0 rgba(255, 0, 99, 0); }
+        }
+        
+        .gallery-link a.highlight {
+            background: #FF0063;
+            color: white;
+            animation: pulse 1s ease-in-out 3;
+        }
     </style>
 </head>
 <body>
@@ -276,12 +295,12 @@
         <form id="uploadForm">
             <div class="form-group">
                 <label for="name">Your name</label>
-                <input type="text" id="name" name="name" placeholder="Max Mustermann">
+                <input type="text" id="name" name="name" placeholder="John Doe">
             </div>
 
             <div class="form-group">
                 <label for="description">Description</label>
-                <textarea id="description" name="description" placeholder="Erzähle von deinem Kombio Moment..."></textarea>
+                <textarea id="description" name="description" placeholder="Drop your Kombio moment here..."></textarea>
             </div>
 
             <div class="form-group">
@@ -454,6 +473,9 @@
                 if (insertError) throw insertError;
 
                 successMsg.style.display = 'block';
+                const galleryLink = document.querySelector('.gallery-link a');
+                galleryLink.classList.add('highlight');
+                setTimeout(() => galleryLink.classList.remove('highlight'), 4000);
                 form.reset();
                 previewContainer.style.display = 'none';
                 previewContainer.style.border = 'none';
@@ -463,7 +485,7 @@
                 fileName.textContent = '';
                 selectedFile = null;
                 photoConfirmed = false;
-
+                
             } catch (error) {
                 console.error('Upload-Fehler:', error);
                 errorMsg.textContent = `❌ Fehler: ${error.message}`;

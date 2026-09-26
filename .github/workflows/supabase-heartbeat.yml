@@ -2,16 +2,15 @@ name: Supabase Heartbeat
 
 # Verhindert zwei Probleme:
 # 1. Supabase pausiert das Projekt nach 7 Tagen Inaktivität
-# 2. GitHub deaktiviert diesen Workflow nach 60 Tagen ohne Repo-Aktivität
+# 2. GitHub deaktiviert diesen Workflow nach 60 Tagen ohne Repo-Aktivitaet
 
 on:
   schedule:
-    # Läuft täglich um 06:00 UTC
-    - cron: '0 6 * * *'
-  workflow_dispatch: # Manuelles Auslösen über den "Run workflow" Button auf GitHub
+    # Laeuft taeglich um 06:17 UTC
+    - cron: '17 6 * * *'
+  workflow_dispatch: # Manuelles Ausloesen ueber den "Run workflow" Button
 
 permissions:
-  actions: write
   contents: write
 
 jobs:
@@ -27,15 +26,39 @@ jobs:
             -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
             -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}")
           echo "Supabase HTTP Status: $STATUS"
-          if [ "$STATUS" != "200" ]; then
-            echo "⚠️ Warnung: Supabase antwortete mit Status $STATUS"
+          if [ "$STATUS" = "200" ]; then
+            echo "OK - Supabase ist aktiv und erreichbar"
           else
-            echo "✅ Supabase ist aktiv und erreichbar"
+            echo "WARNUNG - Supabase antwortete mit Status $STATUS"
+            exit 1
           fi
 
-      # Schritt 2: GitHub-Repo aktiv halten damit dieser Workflow nicht deaktiviert wird
+      # Schritt 2: Repo aktiv halten, damit GitHub diesen Workflow
+      # nicht nach 60 Tagen abschaltet. Schlaegt das fehl, bleibt der
+      # Lauf trotzdem gruen (continue-on-error), weil Schritt 1 zaehlt.
       - name: Checkout Repository
         uses: actions/checkout@v4
+        continue-on-error: true
 
-      - name: Keep GitHub workflow active (verhindert 60-Tage-Deaktivierung)
-        uses: gautamkrishnar/keepalive-workflow@v2
+      - name: Keep repository active
+        continue-on-error: true
+        run: |
+          LAST_COMMIT=$(git log -1 --format=%ct)
+          NOW=$(date +%s)
+          DAYS=$(( (NOW - LAST_COMMIT) / 86400 ))
+          echo "Letzter Commit vor $DAYS Tagen."
+
+          if [ "$DAYS" -lt 40 ]; then
+            echo "Noch frisch genug - kein Commit noetig."
+            exit 0
+          fi
+
+          echo "Aelter als 40 Tage - setze Keepalive-Commit."
+          mkdir -p .github
+          date -u +"%Y-%m-%dT%H:%M:%SZ" > .github/last-heartbeat.txt
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .github/last-heartbeat.txt
+          git commit -m "chore: keepalive heartbeat"
+          git push
